@@ -308,7 +308,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Инициализация календаря
   const datePicker = flatpickr("#birthDate", {
-    dateFormat: "d.m.Y",
     maxDate: "today",
     locale: "ru",
     allowInput: true,
