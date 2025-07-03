@@ -75,9 +75,9 @@ p1 {
 }
 
 .date-input-container {
-    position: relative;
-    width: 250px;
-    margin: 15px auto;
+  position: relative;
+  width: 250px;
+  margin: 15px auto;
 }
 
 .date-icon {
@@ -100,13 +100,9 @@ p1 {
 }
 
 #birthDate {
-    padding: 12px 35px 12px 15px;
-    width: 100%;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    background: white;
-    font-family: var(--font-main);
+  padding: 12px 35px 12px 15px;
+  width: 100%;
+  font-family: inherit; /* Важно! */
 }
 
 .error {
@@ -122,6 +118,14 @@ p1 {
 
 .date-input-container.error .date-icon {
     color: var(--error);
+}
+.date-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2; /* Поверх input */
 }
 
 button {
