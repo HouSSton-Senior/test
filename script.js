@@ -1,3 +1,19 @@
+fetch('arcana.json')
+  .then(response => {
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    return response.text(); // Сначала получи как текст
+  })
+  .then(text => {
+    console.log("Raw JSON text:", text.slice(0, 300)); // Выведи начало файла
+    return JSON.parse(text); // Затем распарсь
+  })
+  .then(data => {
+    arcanaData = data.arcana;
+    console.log("Arcana data loaded:", arcanaData.length);
+  })
+  .catch(error => {
+    console.error("Error loading arcana data:", error);
+  });
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const birthDateInput = document.getElementById('birthDate');
@@ -161,34 +177,45 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Display results on the page
     function displayResults(positions) {
-        // For each position (1-14), display the corresponding arcana
-        for (let i = 1; i <= 14; i++) {
-            const positionKey = `pos${i}`;
-            const arcanaId = positions[positionKey];
-            const arcana = arcanaData.find(a => a.id === arcanaId) || arcanaData[0]; // Fallback to Fool if not found
-            
-            // Get the meaning for this position and spread
-            let meaning = arcana.meanings[currentSpread][i] || 
-                          arcana.meanings[currentSpread]['default'] || 
-                          'Описание отсутствует';
-            
-            // Special handling for positions with decimal points (like 15.1)
-            if (i === 15 && positionKey === 'pos15_1') {
-                meaning = arcana.meanings[currentSpread]['15.1'] || 
-                          arcana.meanings[currentSpread]['default'] || 
-                          'Описание отсутствует';
-            }
-            
-            // Update the DOM
-            const resultElement = document.getElementById(`${positionKey}-result`);
-            if (resultElement) {
-                resultElement.innerHTML = `
-                    <h4>${arcana.name} <span class="arcana-number">${arcanaId === 0 ? 22 : arcanaId}</span></h4>
-                    <p>${meaning}</p>
-                `;
-            }
-        }
+    if (!arcanaData || arcanaData.length === 0) {
+        console.error("Arcana data not loaded!");
+        return;
     }
+
+    for (let i = 1; i <= 14; i++) {
+        const positionKey = `pos${i}`;
+        const arcanaId = positions[positionKey];
+        const arcana = arcanaData.find(a => a.id === arcanaId);
+
+        if (!arcana) {
+            console.warn(`Arcana with id ${arcanaId} not found!`);
+            continue;
+        }
+
+        const resultElement = document.getElementById(`${positionKey}-result`);
+        if (!resultElement) continue;
+
+        // Получаем описание для текущего расклада (individual/shadow/karma)
+        const spreadMeanings = arcana.meanings?.[currentSpread];
+        if (!spreadMeanings) {
+            resultElement.innerHTML = `<p>Ошибка: нет данных для расклада "${currentSpread}"</p>`;
+            continue;
+        }
+
+        // Ищем значение для позиции, иначе берём "default"
+        let meaning = spreadMeanings[i] || spreadMeanings.default || "Описание отсутствует";
+        
+        // Для позиций типа 15.1
+        if (i === 15 && positionKey === 'pos15_1') {
+            meaning = spreadMeanings['15.1'] || spreadMeanings.default || "Описание отсутствует";
+        }
+
+        resultElement.innerHTML = `
+            <h4>${arcana.name} <span class="arcana-number">${arcanaId === 0 ? 22 : arcanaId}</span></h4>
+            <p>${meaning}</p>
+        `;
+    }
+}
     
     // Design and animations can be added here
     function initDesignElements() {
